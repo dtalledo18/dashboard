@@ -1,0 +1,680 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Calibri',system-ui,sans-serif;background:#0a1628;color:#e0eaf8;min-height:100vh;font-size:14px}
+:root{
+  --navy:#0a1628;--panel:#0f2137;--card:#152840;--mid:#1a3558;
+  --accent:#00c9ff;--accent2:#63d8f1;--green:#00e676;--orange:#ffa726;
+  --red:#ef5350;--text:#e0eaf8;--muted:#7aa3c8;--yellow:#ffd740;
+}
+.dash{display:grid;grid-template-columns:260px 1fr;gap:0;min-height:100vh}
+.sidebar{background:var(--panel);border-right:1px solid #1e3a5f;padding:16px 14px;overflow-y:auto}
+.main{background:var(--navy);overflow:auto;padding:16px}
+
+.logo{text-align:center;padding:8px 0 16px;border-bottom:1px solid #1e3a5f;margin-bottom:14px}
+.logo-img{max-width:175px;width:88%;height:auto;display:block;margin:0 auto 8px;filter:drop-shadow(0 2px 6px rgba(0,201,255,0.25))}
+.logo h1{font-size:16px;font-weight:700;color:var(--accent);letter-spacing:1px;line-height:1.3}
+.logo p{font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:.5px}
+
+.cp-section{font-size:11px;font-weight:700;color:var(--accent2);letter-spacing:1.5px;text-transform:uppercase;padding:10px 0 5px;border-bottom:1px solid #1e3a5f;margin-bottom:6px}
+.cp-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0;gap:6px}
+.cp-row label{font-size:12px;color:var(--muted);flex:1;white-space:nowrap}
+.cp-row input{width:90px;background:#fffacd;color:#111;border:none;border-radius:4px;padding:4px 6px;font-size:12px;font-weight:700;text-align:right;outline:none}
+.cp-row input:focus{box-shadow:0 0 0 2px var(--accent)}
+.cp-pct{font-size:10.5px;font-weight:700;text-align:center;min-width:46px;padding:2px 7px;border-radius:10px;background:rgba(99,216,241,0.14);color:var(--accent2);border:1px solid rgba(99,216,241,0.35);white-space:nowrap}
+.cp-pct.warn{background:rgba(239,83,80,0.14);color:#ff8a80;border-color:rgba(239,83,80,0.4)}
+.cp-pct.good{background:rgba(0,230,118,0.14);color:#69f0ae;border-color:rgba(0,230,118,0.4)}
+.cp-derived{display:flex;align-items:center;justify-content:space-between;padding:2px 0}
+.cp-derived label{font-size:12px;color:var(--muted);flex:1}
+.cp-derived span{font-size:12px;font-weight:700;color:var(--accent2);min-width:80px;text-align:right}
+
+.section-title{font-size:13px;font-weight:700;color:var(--accent);letter-spacing:1px;text-transform:uppercase;padding:9px 12px;background:var(--mid);border-radius:6px;margin-bottom:10px}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.kpi-card{background:var(--card);border-radius:8px;padding:11px 13px;border-bottom:3px solid var(--accent)}
+.kpi-card .kpi-label{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.kpi-card .kpi-value{font-size:27px;font-weight:700;color:#fff;line-height:1}
+.kpi-card .kpi-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.kpi-card.green{border-bottom-color:var(--green)}
+.kpi-card.orange{border-bottom-color:var(--orange)}
+.kpi-card.red{border-bottom-color:var(--red)}
+
+.mid-grid{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px;align-items:start}
+.lower-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:14px}
+.full-grid{margin-bottom:14px}
+
+.box{background:var(--card);border-radius:8px;padding:14px;border:1px solid #1e3a5f}
+
+/* 3D Funnel */
+#funnel-canvas{display:block;width:100%;cursor:pointer}
+
+/* Charts */
+.chart-wrap{position:relative;width:100%}
+
+/* Rep matrix */
+.rep-table{width:100%;border-collapse:collapse;font-size:13px}
+.rep-table th{background:var(--panel);color:var(--accent2);padding:6px 8px;text-align:center;font-size:11px;letter-spacing:.5px;text-transform:uppercase}
+.rep-table th:first-child{text-align:left}
+.rep-table td{padding:6px 8px;text-align:center;border-bottom:1px solid #1e3a5f}
+.rep-table td:first-child{text-align:left;color:var(--muted);font-size:13px}
+.rep-table tr.sep td{background:var(--panel)}
+.low{color:#ff8080}.avg{color:#e0eaf8;font-weight:700}.top{color:#80ff80}
+
+/* Staffing table */
+.staff-table{width:100%;border-collapse:collapse;font-size:13px}
+.staff-table th{background:var(--panel);color:var(--accent2);padding:6px 8px;text-align:center;font-size:11px;letter-spacing:.5px;text-transform:uppercase}
+.staff-table td{padding:6px 8px;text-align:center;border-bottom:1px solid #1e3a5f}
+.staff-table .reps{color:var(--accent);font-weight:700;font-size:15px}
+.staff-table .rev{color:var(--green);font-weight:700}
+
+/* Goal planner */
+.goal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.goal-card{background:var(--panel);border-radius:8px;padding:13px;border:1px solid #1e3a5f}
+.goal-card h3{font-size:12px;color:var(--accent2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.goal-row{display:flex;justify-content:space-between;padding:3px 0;font-size:12px}
+.goal-row span:first-child{color:var(--muted)}
+.goal-row span:last-child{color:#fff;font-weight:700}
+.goal-input-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1e3a5f;margin-bottom:8px}
+.goal-input-row label{font-size:12px;color:var(--accent)}
+.goal-input-row input{width:100px;background:#fffacd;color:#111;border:none;border-radius:4px;padding:4px 6px;font-size:13px;font-weight:700;text-align:right}
+
+/* Forecast table */
+.fc-table{width:100%;border-collapse:collapse;font-size:12px}
+.fc-table th{background:var(--panel);color:var(--accent2);padding:5px 6px;text-align:center;font-size:11px}
+.fc-table th:first-child{text-align:left}
+.fc-table td{padding:5px 6px;text-align:center;border-bottom:1px solid #1e3a5f}
+.fc-table td:first-child{text-align:left;color:var(--muted)}
+.fc-table .annual{color:var(--accent);font-weight:700;font-size:13px}
+.fc-table .q{color:var(--green);font-weight:700}
+
+.footer{text-align:center;font-size:11px;color:var(--muted);padding:10px 0;border-top:1px solid #1e3a5f;margin-top:14px}
+.tag{display:inline-block;background:#fffacd;color:#333;border-radius:3px;padding:2px 6px;font-size:10px;font-weight:700;vertical-align:middle;margin-left:4px}
+</style>
+
+<div class="dash">
+
+<!-- ═══ SIDEBAR CONTROL PANEL ═══ -->
+<div class="sidebar">
+  <div class="logo">
+    <img class="logo-img" src="https://res.cloudinary.com/dca79rb3c/image/upload/q_auto/f_auto/v1781299010/logo_1000_fugb2v.png" alt="Advanced Roofing">
+    <p>Executive BI Dashboard</p>
+  </div>
+
+  <div class="cp-section">SMS Funnel</div>
+  <div class="cp-row"><label>SMS Sent</label><input type="number" id="smsSent" value="31285" min="0"></div>
+  <div class="cp-row"><label>Responses</label><span class="cp-pct" id="pct-responses">—</span><input type="number" id="responses" value="626" min="0"></div>
+  <div class="cp-row"><label>Qualified Leads</label><span class="cp-pct" id="pct-qualLeads">—</span><input type="number" id="qualLeads" value="96" min="0"></div>
+  <div class="cp-row"><label>Sched. Inspections</label><span class="cp-pct" id="pct-schedInsp">—</span><input type="number" id="schedInsp" value="22.08" min="0" step="0.01"></div>
+  <div class="cp-row"><label>Compl. Inspections</label><input type="number" id="complInsp" value="22" min="0"></div>
+  <div class="cp-row"><label>Estimates Delivered</label><input type="number" id="estimates" value="13" min="0"></div>
+  <div class="cp-row"><label>Closed Jobs</label><input type="number" id="closedJobs" value="9" min="0"></div>
+
+  <div class="cp-section">Sales Team</div>
+  <div class="cp-row"><label>Sales Reps</label><input type="number" id="salesReps" value="1" min="1"></div>
+  <div class="cp-row"><label>Calls/Rep/Day</label><input type="number" id="callsDay" value="45" min="0"></div>
+  <div class="cp-row"><label>Work Days/Month</label><input type="number" id="workDays" value="20" min="1"></div>
+
+  <div class="cp-section">Revenue</div>
+  <div class="cp-row"><label>Avg Job Value ($)</label><input type="number" id="avgJob" value="10000" min="0"></div>
+  <div class="cp-row"><label>Gross Margin (%)</label><input type="number" id="margin" value="38" min="0" max="100"></div>
+
+  <div class="cp-section">Lead Sources / Mo</div>
+  <div class="cp-row"><label>Meta Leads</label><input type="number" id="metaLeads" value="25" min="0"></div>
+  <div class="cp-row"><label>Google Leads</label><input type="number" id="googleLeads" value="18" min="0"></div>
+  <div class="cp-row"><label>LSA Leads</label><input type="number" id="lsaLeads" value="12" min="0"></div>
+  <div class="cp-derived"><label>SMS Leads</label><span id="d-smsLeads">—</span></div>
+  <div class="cp-derived"><label>Total Leads</label><span id="d-totalLeads">—</span></div>
+
+  <div class="cp-section">Marketing Budget</div>
+  <div class="cp-row"><label>Meta ($)</label><input type="number" id="metaBudget" value="3000" min="0"></div>
+  <div class="cp-row"><label>Google ($)</label><input type="number" id="googleBudget" value="2500" min="0"></div>
+  <div class="cp-row"><label>LSA ($)</label><input type="number" id="lsaBudget" value="1800" min="0"></div>
+  <div class="cp-row"><label>SMS ($)</label><input type="number" id="smsBudget" value="700" min="0"></div>
+
+  <div class="cp-section">Auto-Calculated</div>
+  <div class="cp-derived"><label>Monthly Revenue</label><span id="d-rev">—</span></div>
+  <div class="cp-derived"><label>Gross Profit</label><span id="d-gp">—</span></div>
+  <div class="cp-derived"><label>SMS→Close Rate</label><span id="d-closeRate">—</span></div>
+  <div class="cp-derived"><label>Total Calls/Month</label><span id="d-calls">—</span></div>
+  <div class="cp-derived"><label>Overall ROAS</label><span id="d-roas">—</span></div>
+</div>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<div class="main">
+
+  <!-- KPI CARDS -->
+  <div class="kpi-grid" id="kpi-grid">
+    <div class="kpi-card"><div class="kpi-label">SMS Sent</div><div class="kpi-value" id="k-sms">31,285</div><div class="kpi-sub">Monthly volume</div></div>
+    <div class="kpi-card green"><div class="kpi-label">Closed Jobs</div><div class="kpi-value" id="k-jobs">9</div><div class="kpi-sub">Monthly</div></div>
+    <div class="kpi-card green"><div class="kpi-label">Revenue</div><div class="kpi-value" id="k-rev">$90.0K</div><div class="kpi-sub">Monthly gross</div></div>
+    <div class="kpi-card"><div class="kpi-label">Gross Profit</div><div class="kpi-value" id="k-gp">$34.2K</div><div class="kpi-sub">At 38% margin</div></div>
+    <div class="kpi-card"><div class="kpi-label">ROAS</div><div class="kpi-value" id="k-roas">11.3x</div><div class="kpi-sub">Return on ad spend</div></div>
+    <div class="kpi-card"><div class="kpi-label">Rev / Rep</div><div class="kpi-value" id="k-revRep">$90.0K</div><div class="kpi-sub">Monthly per rep</div></div>
+    <div class="kpi-card orange"><div class="kpi-label">Leads / Rep</div><div class="kpi-value" id="k-leadsRep">151</div><div class="kpi-sub">Monthly per rep</div></div>
+    <div class="kpi-card"><div class="kpi-label">SMS→Close</div><div class="kpi-value" id="k-smsClose">0.029%</div><div class="kpi-sub">Conversion rate</div></div>
+  </div>
+
+  <!-- MID: 3D FUNNEL + REP MATRIX -->
+  <div class="mid-grid">
+    <!-- 3D FUNNEL -->
+    <div class="box">
+      <div class="section-title">Conversion Funnel</div>
+      <canvas id="funnel-canvas" height="560"></canvas>
+    </div>
+
+    <!-- REP PERFORMANCE -->
+    <div class="box">
+      <div class="section-title">Sales Rep Performance</div>
+      <table class="rep-table" id="rep-table">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th class="low">Low (60%)</th>
+            <th class="avg">Average</th>
+            <th class="top">Top (150%)</th>
+          </tr>
+        </thead>
+        <tbody id="rep-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- LOWER: STAFFING -->
+  <div class="lower-grid">
+    <!-- STAFFING -->
+    <div class="box">
+      <div class="section-title">Staffing Growth Planner</div>
+      <table class="staff-table" id="staff-table">
+        <thead>
+          <tr>
+            <th>Reps</th><th>Leads</th><th>Calls/Day</th><th>Inspections</th><th>Sales/Mo</th><th>Revenue</th><th>Gross Profit</th>
+          </tr>
+        </thead>
+        <tbody id="staff-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FORECAST -->
+  <div class="box full-grid">
+    <div class="section-title">Revenue Forecast — Monthly with Growth Trend</div>
+    <div class="chart-wrap" style="height:200px;margin-bottom:14px"><canvas id="forecastChart" role="img" aria-label="Monthly revenue forecast line chart">Monthly revenue trend.</canvas></div>
+    <table class="fc-table" id="fc-table">
+      <thead><tr><th>Metric</th><th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th><th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th><th class="q">Q1</th><th class="q">Q2</th><th class="q">Q3</th><th class="q">Q4</th><th class="annual">Annual</th></tr></thead>
+      <tbody id="fc-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- GOAL PLANNER -->
+  <div class="box full-grid">
+    <div class="section-title">Goal Planner — Back-solve from targets <span class="tag">EDITABLE</span></div>
+    <div class="goal-grid">
+      <div class="goal-card">
+        <h3>By Revenue Target</h3>
+        <div class="goal-input-row"><label>Target Revenue ($)</label><input type="number" id="goalRev" value="500000" min="0"></div>
+        <div id="goal-rev-results"></div>
+      </div>
+      <div class="goal-card">
+        <h3>By Closed Jobs Target</h3>
+        <div class="goal-input-row"><label>Target Jobs</label><input type="number" id="goalJobs" value="52" min="0"></div>
+        <div id="goal-jobs-results"></div>
+      </div>
+      <div class="goal-card">
+        <h3>By Inspections Target</h3>
+        <div class="goal-input-row"><label>Target Inspections</label><input type="number" id="goalInsp" value="80" min="0"></div>
+        <div id="goal-insp-results"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Advanced Roofing Team Construction, Inc. · Des Plaines, IL · BI Dashboard v4.1 · <span class="tag">Yellow</span> = editable inputs</div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ─── HELPERS ───────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const fmt = (n, decimals=0) => n.toLocaleString('en-US', {minimumFractionDigits:decimals, maximumFractionDigits:decimals});
+const fmtD = (n, decimals=0) => '$' + fmt(n, decimals);
+const fmtK = n => n >= 1000000 ? '$' + (n/1000000).toFixed(1)+'M' : n >= 1000 ? '$' + (n/1000).toFixed(1)+'K' : '$'+n;
+const pct = (a,b) => b===0 ? 0 : a/b;
+const safe = (n) => isFinite(n) ? n : 0;
+
+// ─── READ INPUTS ───────────────────────────────────────────────────
+function vals() {
+  const v = id => parseFloat($(id).value)||0;
+  const smsSent    = v('smsSent');
+  const responses  = v('responses');
+  const qualLeads  = v('qualLeads');
+  const schedInsp  = v('schedInsp');
+  const complInsp  = v('complInsp');
+  const estimates  = v('estimates');
+  const closedJobs = v('closedJobs');
+  const salesReps  = Math.max(1, v('salesReps'));
+  const callsDay   = v('callsDay');
+  const workDays   = v('workDays');
+  const avgJob     = v('avgJob');
+  const margin     = v('margin')/100;
+  const metaLeads  = v('metaLeads');
+  const googleLeads= v('googleLeads');
+  const lsaLeads   = v('lsaLeads');
+  const metaBudget = v('metaBudget');
+  const googleBudget=v('googleBudget');
+  const lsaBudget  = v('lsaBudget');
+  const smsBudget  = v('smsBudget');
+  const totalBudget= metaBudget+googleBudget+lsaBudget+smsBudget;
+  const totalLeads = metaLeads+googleLeads+lsaLeads+qualLeads;
+  const revenue    = closedJobs*avgJob;
+  const grossProfit= revenue*margin;
+  const totalCalls = salesReps*callsDay*workDays;
+  const roas       = totalBudget>0 ? revenue/totalBudget : 0;
+  return {smsSent,responses,qualLeads,schedInsp,complInsp,estimates,closedJobs,
+          salesReps,callsDay,workDays,avgJob,margin,metaLeads,googleLeads,lsaLeads,
+          metaBudget,googleBudget,lsaBudget,smsBudget,totalBudget,totalLeads,
+          revenue,grossProfit,totalCalls,roas};
+}
+
+// ─── 3D FUNNEL on Canvas ───────────────────────────────────────────
+const funnelCanvas = $('funnel-canvas');
+const funnelCtx    = funnelCanvas.getContext('2d');
+
+const FUNNEL_COLORS = [
+  ['#0c63d6','#073b8a'],
+  ['#0080e0','#0357a3'],
+  ['#0098e8','#02699e'],
+  ['#00b0e8','#017f9c'],
+  ['#00c4d8','#018a96'],
+  ['#00d4b8','#019884'],
+  ['#1de07f','#0aa85b'],
+];
+
+function drawFunnel(data) {
+  const stages = [
+    {label:'SMS Sent',       val:data.smsSent},
+    {label:'Responses',      val:data.responses},
+    {label:'Qual. Leads',    val:data.qualLeads},
+    {label:'Sched. Insp.',   val:data.schedInsp},
+    {label:'Compl. Insp.',   val:data.complInsp},
+    {label:'Estimates',      val:data.estimates},
+    {label:'Closed Jobs',    val:data.closedJobs},
+  ];
+
+  const W = funnelCanvas.width;
+  const H = funnelCanvas.height;
+  const ctx = funnelCtx;
+  ctx.clearRect(0,0,W,H);
+
+  const n      = stages.length;
+  const padT   = 18;
+  const padB   = 18;
+  const segGap = 5;
+  const segH   = (H - padT - padB) / n;
+  const maxW   = W * 0.92;
+  const minW   = W * 0.15;
+  const depth  = Math.max(10, Math.min(20, W * 0.018));
+  const radius = Math.min(12, segH*0.16);
+  const maxVal = Math.max(stages[0].val, 1);
+
+  const labelFont = Math.max(12, Math.min(20, Math.round(W*0.030)));
+  const valueFont = Math.max(14, Math.min(24, Math.round(W*0.036)));
+  const pctFont   = Math.max(10, Math.min(15, Math.round(W*0.023)));
+
+  stages.forEach((s, i) => {
+    const segW    = minW + (maxW - minW) * ((n-1-i)/(n-1));
+    const nextSegW= i<n-1 ? minW + (maxW - minW) * ((n-2-i)/(n-1)) : minW;
+
+    const y0 = padT + i * segH;
+    const y1 = y0 + segH - segGap;
+    const cx = W/2;
+
+    const xL0 = cx - segW/2;
+    const xR0 = cx + segW/2;
+    const xL1 = cx - nextSegW/2;
+    const xR1 = cx + nextSegW/2;
+
+    const [c1, c2] = FUNNEL_COLORS[i % FUNNEL_COLORS.length];
+
+    // Drop shadow + main trapezoid (rounded at very top / very bottom)
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.45)';
+    ctx.shadowBlur = 12;
+    ctx.shadowOffsetY = 5;
+
+    const grad = ctx.createLinearGradient(xL0, y0, xR0, y0);
+    grad.addColorStop(0,    c2);
+    grad.addColorStop(0.16, c1);
+    grad.addColorStop(0.84, c1);
+    grad.addColorStop(1,    c2);
+
+    ctx.beginPath();
+    if (i===0) {
+      ctx.moveTo(xL0+radius, y0);
+      ctx.lineTo(xR0-radius, y0);
+      ctx.quadraticCurveTo(xR0, y0, xR0, y0+radius);
+    } else {
+      ctx.moveTo(xL0, y0);
+      ctx.lineTo(xR0, y0);
+    }
+    if (i===n-1) {
+      ctx.lineTo(xR1, y1-radius);
+      ctx.quadraticCurveTo(xR1, y1, xR1-radius, y1);
+      ctx.lineTo(xL1+radius, y1);
+      ctx.quadraticCurveTo(xL1, y1, xL1, y1-radius);
+    } else {
+      ctx.lineTo(xR1, y1);
+      ctx.lineTo(xL1, y1);
+    }
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.restore();
+
+    // Glossy top highlight
+    const glossGrad = ctx.createLinearGradient(xL0, y0, xL0, y0+segH*0.4);
+    glossGrad.addColorStop(0, 'rgba(255,255,255,0.28)');
+    glossGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.beginPath();
+    ctx.moveTo(xL0, y0);
+    ctx.lineTo(xR0, y0);
+    ctx.lineTo(xR0 - (xR0-xR1)*0.4, y0+segH*0.4);
+    ctx.lineTo(xL0 + (xL0-xL1)*0.4, y0+segH*0.4);
+    ctx.closePath();
+    ctx.fillStyle = glossGrad;
+    ctx.fill();
+
+    // Right 3D side face
+    const sideGrad = ctx.createLinearGradient(xR0, y0, xR0+depth, y0);
+    sideGrad.addColorStop(0, c1);
+    sideGrad.addColorStop(1, c2);
+    ctx.beginPath();
+    ctx.moveTo(xR0, y0);
+    ctx.lineTo(xR0+depth*0.6, y0-depth*0.45);
+    ctx.lineTo(xR1+depth*0.6, y1-depth*0.45);
+    ctx.lineTo(xR1, y1);
+    ctx.closePath();
+    ctx.fillStyle = sideGrad;
+    ctx.fill();
+
+    // Subtle outline
+    ctx.beginPath();
+    ctx.moveTo(xL0, y0); ctx.lineTo(xR0,y0); ctx.lineTo(xR1,y1); ctx.lineTo(xL1,y1); ctx.closePath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Stage number badge
+    const badgeR = Math.max(9, Math.min(16, segH*0.14));
+    const badgeX = xL0 + badgeR + 8;
+    const badgeY = (y0+y1)/2;
+    ctx.beginPath();
+    ctx.arc(badgeX, badgeY, badgeR, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.font = `bold ${Math.round(badgeR*1.05)}px Calibri, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(i+1, badgeX, badgeY+1);
+    ctx.textBaseline = 'alphabetic';
+
+    // Stage label
+    ctx.fillStyle = 'rgba(255,255,255,0.96)';
+    ctx.font = `bold ${labelFont}px Calibri, sans-serif`;
+    ctx.textAlign = 'left';
+    ctx.fillText(s.label, badgeX + badgeR + 12, badgeY + labelFont*0.34);
+
+    // Value (right aligned)
+    ctx.textAlign = 'right';
+    ctx.font = `bold ${valueFont}px Calibri, sans-serif`;
+    ctx.fillStyle = '#fff';
+    ctx.fillText(fmt(s.val), xR0 - 16, badgeY + valueFont*0.32);
+
+    // Conversion % pill between stages
+    if (i > 0) {
+      const prev = stages[i-1].val;
+      const convPct = prev > 0 ? (s.val/prev*100).toFixed(1)+'%' : '—';
+      const pillText = '▼ ' + convPct;
+      ctx.font = `bold ${pctFont}px Calibri, sans-serif`;
+      const pillW = ctx.measureText(pillText).width + 16;
+      const pillH = pctFont + 9;
+      const pillX = cx - pillW/2;
+      const pillY = y0 - pillH/2;
+      ctx.beginPath();
+      if (ctx.roundRect) { ctx.roundRect(pillX, pillY, pillW, pillH, pillH/2); }
+      else { ctx.rect(pillX, pillY, pillW, pillH); }
+      ctx.fillStyle = 'rgba(8,18,32,0.92)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.fillStyle = '#7ee8fa';
+      ctx.textAlign = 'center';
+      ctx.fillText(pillText, cx, pillY + pillH/2 + pctFont*0.32);
+    }
+  });
+}
+
+// Resize canvas to actual px — height scales proportionally with width
+function resizeFunnel() {
+  const rect = funnelCanvas.getBoundingClientRect();
+  const w = rect.width || 600;
+  funnelCanvas.width  = w;
+  funnelCanvas.height = Math.round(w * 0.85);
+  drawFunnel(vals());
+}
+
+// ─── CHART INSTANCES ────────────────────────────────────────────────
+let forecastChart;
+
+function buildCharts(data) {
+  const growth = [1,1.03,1.05,1.08,1.10,1.12,1.15,1.18,1.20,1.22,1.25,1.28];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const revFc  = growth.map(g => Math.round(data.revenue*g));
+
+  // Forecast line chart
+  if (forecastChart) forecastChart.destroy();
+  forecastChart = new Chart($('forecastChart'), {
+    type:'line',
+    data:{
+      labels: months,
+      datasets:[{
+        label:'Revenue ($)',
+        data: revFc,
+        borderColor:'#00c9ff',
+        backgroundColor:'rgba(0,201,255,0.08)',
+        borderWidth:2.5,
+        fill:true,
+        tension:0.4,
+        pointRadius:3,
+        pointBackgroundColor:'#00c9ff',
+        borderDash:[],
+      },{
+        label:'Gross Profit ($)',
+        data: revFc.map(r => Math.round(r*data.margin)),
+        borderColor:'#00e676',
+        backgroundColor:'rgba(0,230,118,0.04)',
+        borderWidth:1.5,
+        fill:false,
+        tension:0.4,
+        pointRadius:2,
+        pointBackgroundColor:'#00e676',
+        borderDash:[6,3],
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:c=>' '+fmtD(c.raw)}}
+      },
+      scales:{
+        x:{ticks:{color:'#7aa3c8',font:{size:11}},grid:{color:'rgba(255,255,255,0.05)'}},
+        y:{ticks:{color:'#7aa3c8',font:{size:11},callback:v=>fmtK(v)},grid:{color:'rgba(255,255,255,0.05)'}}
+      }
+    }
+  });
+}
+
+// ─── UPDATE ALL UI ──────────────────────────────────────────────────
+function update() {
+  const d = vals();
+
+  // Sidebar derived
+  $('d-smsLeads').textContent   = fmt(d.qualLeads);
+  $('d-totalLeads').textContent = fmt(d.totalLeads);
+  $('d-rev').textContent        = fmtD(d.revenue);
+  $('d-gp').textContent         = fmtD(d.grossProfit);
+  $('d-closeRate').textContent  = d.smsSent>0 ? (d.closedJobs/d.smsSent*100).toFixed(3)+'%' : '—';
+  $('d-calls').textContent      = fmt(d.totalCalls);
+  $('d-roas').textContent       = d.roas.toFixed(2)+'x';
+
+  // Inline % badges (Responses % of SMS Sent, Qualified Leads % of Responses, Sched. Insp. % of Qualified Leads)
+  function setPctBadge(elId, value, goodMin) {
+    const el = $(elId);
+    el.textContent = isFinite(value) ? value.toFixed(1)+'%' : '—';
+    el.classList.remove('good','warn');
+    if (isFinite(value)) el.classList.add(value >= goodMin ? 'good' : 'warn');
+  }
+  setPctBadge('pct-responses', d.smsSent>0 ? d.responses/d.smsSent*100 : NaN, 1.5);
+  setPctBadge('pct-qualLeads', d.responses>0 ? d.qualLeads/d.responses*100 : NaN, 12);
+  setPctBadge('pct-schedInsp', d.qualLeads>0 ? d.schedInsp/d.qualLeads*100 : NaN, 20);
+
+  // KPI cards
+  $('k-sms').textContent    = fmt(d.smsSent);
+  $('k-jobs').textContent   = fmt(d.closedJobs);
+  $('k-rev').textContent    = fmtK(d.revenue);
+  $('k-gp').textContent     = fmtK(d.grossProfit);
+  $('k-roas').textContent   = d.roas.toFixed(1)+'x';
+  $('k-revRep').textContent = fmtK(safe(d.revenue/d.salesReps));
+  $('k-leadsRep').textContent=fmt(Math.round(safe(d.totalLeads/d.salesReps)));
+  $('k-smsClose').textContent=d.smsSent>0?(d.closedJobs/d.smsSent*100).toFixed(3)+'%':'—';
+
+  // 3D Funnel
+  drawFunnel(d);
+
+  // Rep performance table
+  const repRows = [
+    ['Leads/Month', Math.round(safe(d.totalLeads/d.salesReps)*0.6), Math.round(safe(d.totalLeads/d.salesReps)), Math.round(safe(d.totalLeads/d.salesReps)*1.5), ''],
+    ['Calls/Day',   Math.round(d.callsDay*0.6), d.callsDay, Math.round(d.callsDay*1.5), ''],
+    ['Calls/Month', Math.round(d.callsDay*d.workDays*0.6), d.callsDay*d.workDays, Math.round(d.callsDay*d.workDays*1.5), ''],
+    ['Conversations',Math.round(d.callsDay*d.workDays*0.6*0.08), Math.round(d.callsDay*d.workDays*0.10), Math.round(d.callsDay*d.workDays*1.5*0.12), ''],
+    ['Sched. Insp.', Math.round(safe(d.schedInsp/d.salesReps)*0.7), Math.round(safe(d.schedInsp/d.salesReps)), Math.round(safe(d.schedInsp/d.salesReps)*1.4), ''],
+    ['Closed Jobs',  Math.round(safe(d.closedJobs/d.salesReps)*0.6), Math.round(safe(d.closedJobs/d.salesReps)), Math.round(safe(d.closedJobs/d.salesReps)*1.5), ''],
+    ['Revenue',      fmtD(Math.round(safe(d.closedJobs/d.salesReps)*0.6*d.avgJob)), fmtD(Math.round(safe(d.closedJobs/d.salesReps)*d.avgJob)), fmtD(Math.round(safe(d.closedJobs/d.salesReps)*1.5*d.avgJob)), ''],
+    ['Gross Profit', fmtD(Math.round(safe(d.closedJobs/d.salesReps)*0.6*d.avgJob*d.margin)), fmtD(Math.round(safe(d.closedJobs/d.salesReps)*d.avgJob*d.margin)), fmtD(Math.round(safe(d.closedJobs/d.salesReps)*1.5*d.avgJob*d.margin)), ''],
+  ];
+  const repTbody = $('rep-tbody');
+  repTbody.innerHTML = repRows.map(r=>`<tr>
+    <td>${r[0]}</td>
+    <td class="low">${r[1]}</td>
+    <td class="avg">${r[2]}</td>
+    <td class="top">${r[3]}</td>
+  </tr>`).join('');
+
+  // Staffing planner
+  const repCounts = [2,3,5,10,20,50];
+  $('staff-tbody').innerHTML = repCounts.map(n => {
+    const revN = Math.round(safe(d.closedJobs/d.salesReps)*n*d.avgJob);
+    const gpN  = Math.round(revN*d.margin);
+    return `<tr>
+      <td class="reps">${n}</td>
+      <td>${fmt(Math.round(safe(d.totalLeads/d.salesReps)*n))}</td>
+      <td>${fmt(d.callsDay*n)}</td>
+      <td>${fmt(Math.round(safe(d.complInsp/d.salesReps)*n))}</td>
+      <td>${fmt(Math.round(safe(d.closedJobs/d.salesReps)*n))}</td>
+      <td class="rev">${fmtK(revN)}</td>
+      <td style="color:#90ff90">${fmtK(gpN)}</td>
+    </tr>`;
+  }).join('');
+
+  // Forecast table
+  const growth = [1,1.03,1.05,1.08,1.10,1.12,1.15,1.18,1.20,1.22,1.25,1.28];
+  const fcMetrics = [
+    {label:'Revenue ($)',    fn:g=>Math.round(d.revenue*g), color:'#fff', fmt:fmtK},
+    {label:'Gross Profit ($)',fn:g=>Math.round(d.grossProfit*g), color:'#b0c4de', fmt:fmtK},
+    {label:'Closed Jobs',   fn:g=>Math.round(d.closedJobs*g), color:'#7aa3c8', fmt:n=>fmt(n)},
+    {label:'Leads',         fn:g=>Math.round(d.totalLeads*g), color:'#7aa3c8', fmt:n=>fmt(n)},
+  ];
+  $('fc-tbody').innerHTML = fcMetrics.map(m=>{
+    const vals12 = growth.map(m.fn);
+    const q1=vals12[0]+vals12[1]+vals12[2];
+    const q2=vals12[3]+vals12[4]+vals12[5];
+    const q3=vals12[6]+vals12[7]+vals12[8];
+    const q4=vals12[9]+vals12[10]+vals12[11];
+    const ann=q1+q2+q3+q4;
+    return `<tr>
+      <td style="color:${m.color}">${m.label}</td>
+      ${vals12.map(v=>`<td style="color:${m.color}">${m.fmt(v)}</td>`).join('')}
+      <td class="q">${m.fmt(q1)}</td><td class="q">${m.fmt(q2)}</td>
+      <td class="q">${m.fmt(q3)}</td><td class="q">${m.fmt(q4)}</td>
+      <td class="annual">${m.fmt(ann)}</td>
+    </tr>`;
+  }).join('');
+
+  // Goal planner
+  function goalResults(target, type) {
+    let reqLeads, reqInsp, reqCalls, reqReps, reqBudget, reqSMS;
+    if (type==='rev') {
+      const scale = d.revenue>0 ? target/d.revenue : 0;
+      reqLeads  = Math.round(d.totalLeads*scale);
+      reqInsp   = Math.round(d.complInsp*scale);
+      reqCalls  = Math.round(d.totalCalls*scale);
+      reqReps   = d.salesReps>0&&d.revenue>0 ? Math.ceil(d.salesReps*scale) : 0;
+      reqBudget = Math.round(d.totalBudget*scale);
+      reqSMS    = Math.round(d.smsSent*scale);
+    } else if (type==='jobs') {
+      const scale = d.closedJobs>0 ? target/d.closedJobs : 0;
+      reqLeads  = Math.round(d.totalLeads*scale);
+      reqInsp   = Math.round(d.complInsp*scale);
+      reqCalls  = Math.round(d.totalCalls*scale);
+      reqReps   = Math.ceil(d.salesReps*scale);
+      reqBudget = Math.round(d.totalBudget*scale);
+      reqSMS    = Math.round(d.smsSent*scale);
+    } else {
+      const scale = d.complInsp>0 ? target/d.complInsp : 0;
+      reqLeads  = Math.round(d.totalLeads*scale);
+      reqInsp   = target;
+      reqCalls  = Math.round(d.totalCalls*scale);
+      reqReps   = Math.ceil(d.salesReps*scale);
+      reqBudget = Math.round(d.totalBudget*scale);
+      reqSMS    = Math.round(d.smsSent*scale);
+    }
+    return [
+      ['Req. Leads',   fmt(reqLeads)],
+      ['Req. Insp.',   fmt(reqInsp)],
+      ['Req. Calls/Mo',fmt(reqCalls)],
+      ['Req. Reps',    fmt(reqReps)],
+      ['Req. Budget',  fmtD(reqBudget)],
+      ['Req. SMS Vol', fmt(reqSMS)],
+    ];
+  }
+
+  const goalRevTarget  = parseFloat($('goalRev').value)||0;
+  const goalJobsTarget = parseFloat($('goalJobs').value)||0;
+  const goalInspTarget = parseFloat($('goalInsp').value)||0;
+
+  function renderGoal(elId, rows) {
+    $(elId).innerHTML = rows.map(r=>`<div class="goal-row"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('');
+  }
+  renderGoal('goal-rev-results',  goalResults(goalRevTarget,'rev'));
+  renderGoal('goal-jobs-results', goalResults(goalJobsTarget,'jobs'));
+  renderGoal('goal-insp-results', goalResults(goalInspTarget,'insp'));
+
+  // rebuild charts
+  buildCharts(d);
+}
+
+// ─── EVENT LISTENERS ───────────────────────────────────────────────
+document.querySelectorAll('input[type=number]').forEach(inp => {
+  inp.addEventListener('input', update);
+});
+
+// Initial render
+window.addEventListener('load', () => {
+  setTimeout(() => { resizeFunnel(); update(); }, 100);
+});
+window.addEventListener('resize', () => { resizeFunnel(); });
+</script>
